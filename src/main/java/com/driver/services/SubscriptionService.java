@@ -22,81 +22,83 @@ public class SubscriptionService {
     @Autowired
     UserRepository userRepository;
 
-    public Integer buySubscription(SubscriptionEntryDto subscriptionEntryDto){
 
-        //Save The subscription Object into the Db and return the total Amount that user has to pay
-        Subscription subscription = new Subscription();
 
-         int amountToBepaid =0;
-         if(subscription.getSubscriptionType().toString().equals("BASIC")){
-             amountToBepaid= 500 + (200 * subscriptionEntryDto.getNoOfScreensRequired());
-         }
-        if(subscription.getSubscriptionType().toString().equals("PRO")){
-            amountToBepaid= 800 + (250 * subscriptionEntryDto.getNoOfScreensRequired());
+        public Integer buySubscription(SubscriptionEntryDto subscriptionEntryDto){
+
+            //Save The subscription Object into the Db and return the total Amount that user has to pay
+            User user = userRepository.findById(subscriptionEntryDto.getUserId()).get();
+            Subscription subscription = new Subscription();
+            subscription.setSubscriptionType(subscriptionEntryDto.getSubscriptionType());
+            subscription.setNoOfScreensSubscribed(subscriptionEntryDto.getNoOfScreensRequired());
+
+            //Total amount calculate
+            int amount=0;
+            if(subscription.getSubscriptionType().toString().equals("BASIC")) {
+                amount = 500 + (200 * subscriptionEntryDto.getNoOfScreensRequired());
+            }
+            else if (subscription.getSubscriptionType().toString().equals("PRO")) {
+                amount = 800 + (250 * subscriptionEntryDto.getNoOfScreensRequired());
+            }
+            else{
+                amount = 1000 + (350 * subscriptionEntryDto.getNoOfScreensRequired());
+            }
+
+            subscription.setTotalAmountPaid(amount);
+            subscription.setUser(user);
+            user.setSubscription(subscription);
+
+            userRepository.save(user);
+            //subscriptionRepository.save(subscription);
+
+            return amount;
         }
-        if(subscription.getSubscriptionType().toString().equals("ELITE")){
-            amountToBepaid= 1000 + (350 * subscriptionEntryDto.getNoOfScreensRequired());
+
+        public Integer upgradeSubscription(Integer userId)throws Exception{
+
+            //If you are already at an ElITE subscription : then throw Exception ("Already the best Subscription")
+            //In all other cases just try to upgrade the subscription and tell the difference of price that user has to pay
+            //update the subscription in the repository
+
+            User user = userRepository.findById(userId).get();
+            Subscription userSubscription = user.getSubscription();
+
+            if(userSubscription.getSubscriptionType().toString().equals("ELITE")){
+                throw new Exception("Already the best Subscription");
+            }
+
+            int prevPaid = user.getSubscription().getTotalAmountPaid();
+            int currPaid = 0;
+
+            if(userSubscription.getSubscriptionType().toString().equals("BASIC")){
+                currPaid = 800 + (250 * user.getSubscription().getNoOfScreensSubscribed());
+                userSubscription.setSubscriptionType(SubscriptionType.PRO);
+            }
+            else{
+                currPaid = 1000 + (350 * user.getSubscription().getNoOfScreensSubscribed());
+                userSubscription.setSubscriptionType(SubscriptionType.ELITE);
+            }
+
+            subscriptionRepository.save(userSubscription);
+
+            return currPaid-prevPaid;
         }
 
-        subscription.setId(subscriptionEntryDto.getUserId());
-        subscription.setSubscriptionType(subscriptionEntryDto.getSubscriptionType());
-        subscription.setNoOfScreensSubscribed(subscriptionEntryDto.getNoOfScreensRequired());
-        subscription.setTotalAmountPaid(amountToBepaid);
+        public Integer calculateTotalRevenueOfHotstar(){
 
-        User premiumUser = userRepository.findById(subscriptionEntryDto.getUserId()).get();
-        subscription.setUser(premiumUser);
+            //We need to find out total Revenue of hotstar : from all the subscriptions combined
+            //Hint is to use findAll function from the SubscriptionDb
 
-        // parrent is user
-        userRepository.save(premiumUser);
+            List<Subscription> subscriptionList = subscriptionRepository.findAll();
 
-        return amountToBepaid;
+            int revenue = 0;
+
+            for(Subscription subscription : subscriptionList){
+                revenue += subscription.getTotalAmountPaid();
+            }
+
+            return revenue;
+        }
+
     }
 
-    public Integer upgradeSubscription(Integer userId)throws Exception{
-
-        //If you are already at an ElITE subscription : then throw Exception ("Already the best Subscription")
-        //In all other cases just try to upgrade the subscription and tell the difference of price that user has to pay
-        //update the subscription in the repository
-
-        User user = userRepository.findById(userId).get();
-        Subscription userSubscription = user.getSubscription();
-
-        if(userSubscription.getSubscriptionType().toString().equals("ELITE")){
-            throw new Exception("Best Subscription already present");
-        }
-
-        int prevPaid = user.getSubscription().getTotalAmountPaid();
-        int currPaid = 0;
-
-        if(userSubscription.getSubscriptionType().toString().equals("BASIC")){
-            currPaid = 800 + (250 * user.getSubscription().getNoOfScreensSubscribed());
-            userSubscription.setSubscriptionType(SubscriptionType.PRO);
-        }
-        else{
-            currPaid = 1000 + (350 * user.getSubscription().getNoOfScreensSubscribed());
-            userSubscription.setSubscriptionType(SubscriptionType.ELITE);
-        }
-
-        subscriptionRepository.save(userSubscription);
-
-        return currPaid-prevPaid;
-    }
-
-    public Integer calculateTotalRevenueOfHotstar(){
-
-        //We need to find out total Revenue of hotstar : from all the subscriptions combined
-        //Hint is to use findAll function from the SubscriptionDb
-
-        List<Subscription> subscriptions = subscriptionRepository.findAll();
-        int revenue = 0; // retyrn type is wrapper class
-//        for(int i =0; i< subscriptions.size();i++)
-//        {
-//            revenue +=subscriptions.get(i).getTotalAmountPaid();
-//        }
-        for(Subscription subscription : subscriptions){
-            revenue += subscription.getTotalAmountPaid();
-        }
-        return revenue;
-    }
-
-}
