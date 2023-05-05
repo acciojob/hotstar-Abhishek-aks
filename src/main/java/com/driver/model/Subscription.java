@@ -30,6 +30,9 @@ public class Subscription {
     @JoinColumn
     private User user;
 
+
+
+    // constructor - Getters and Setters
     public Subscription(SubscriptionType subscriptionType, int noOfScreensSubscribed, Date startSubscriptionDate, int totalAmountPaid) {
         this.subscriptionType = subscriptionType;
         this.noOfScreensSubscribed = noOfScreensSubscribed;

@@ -27,6 +27,9 @@ public class User {
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
     private Subscription subscription;
 
+
+
+    //Constuctors - Getter & Setter
     public User(int id, String name, int age, String mobNo) {
         this.id = id;
         this.name = name;

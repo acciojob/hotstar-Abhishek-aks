@@ -8,6 +8,7 @@ import com.driver.model.WebSeries;
 import com.driver.repository.UserRepository;
 import com.driver.repository.WebSeriesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.server.DelegatingServerHttpResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +26,8 @@ public class UserService {
     public Integer addUser(User user){
 
         //Jut simply add the user to the Db and return the userId returned by the repository
-        return null;
+        User user1 = userRepository.save(user); // saved the new user in db
+        return user1.getId();                   // fetch the Id of the user addded
     }
 
     public Integer getAvailableCountOfWebSeriesViewable(Integer userId){
@@ -33,8 +35,33 @@ public class UserService {
         //Return the count of all webSeries that a user can watch based on his ageLimit and subscriptionType
         //Hint: Take out all the Webseries from the WebRepository
 
+        List<WebSeries> webSeriesList = webSeriesRepository.findAll();
+        int count =0;
+        User user1 = userRepository.findById(userId).get();
+        Subscription subscription = user1.getSubscription();
+        SubscriptionType subscriptionType = subscription.getSubscriptionType();
+        // based on subscriptions the Viewable webseries counting is possible
+        if(subscriptionType.toString().equals("BASIC")){
+            for (WebSeries wb : webSeriesList){
+                if(wb.getSubscriptionType().toString().equals("BASIC"))
+                    count++;
+            }
+        }
+        else if (subscriptionType.toString().equals("PRO")) {
+            for (WebSeries wb : webSeriesList){
+                if(wb.getSubscriptionType().toString().equals("PRO") || wb.getSubscriptionType().toString().equals("BASIC")){
+                    count++;
+                }
+            }
+        }
+        else    //(subscriptionType.toString().equals("ELITE")))
+        {
+           for (WebSeries wb : webSeriesList){
+                count++;    // if you are Elite you can watch all webSeries
+            }
+        }
 
-        return null;
+        return count;
     }
 
 

@@ -4,6 +4,9 @@ public class ProductionHouseEntryDto {
 
     private String name;
 
+
+
+    //Constructor -Getter and Setter
     public ProductionHouseEntryDto(String name) {
         this.name = name;
     }

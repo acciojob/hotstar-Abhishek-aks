@@ -20,17 +20,16 @@ public class WebSeries {
 
     @Column(unique = true)
     private String seriesName;
-
     private int ageLimit;
-
     private double rating;
-
     private SubscriptionType subscriptionType; //This denotes with which of subscriptionType this webseries comes ie. BASIC,PRO, ELITE
 
     @ManyToOne
     @JoinColumn
     private ProductionHouse productionHouse;
 
+
+    // Constructors -Getters & Setters
     public WebSeries(String seriesName, int ageLimit, double rating, SubscriptionType subscriptionType) {
         this.seriesName = seriesName;
         this.ageLimit = ageLimit;

@@ -11,15 +11,14 @@ public class WebSeriesEntryDto {
 
 
     private String seriesName;
-
     private int ageLimit;
-
     private double rating;
-
     private SubscriptionType subscriptionType; //This denotes with which of subscriptionType this webseries comes ie. BASIC,PRO, ELITE
-
     private Integer productionHouseId;
 
+
+
+    //Constructor -Getter and Setter
     public WebSeriesEntryDto(String seriesName, int ageLimit, double rating, SubscriptionType subscriptionType, Integer productionHouseId) {
         this.ageLimit = ageLimit;
         this.seriesName = seriesName;
